@@ -1,0 +1,173 @@
+// arhivos.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include "conio.h"
+#include "stdlib.h"
+#include <string>
+
+using namespace std;
+
+void creararchivo();
+void adicionaramigo();
+void listado();
+void modificar();
+int obtpos(string n)
+
+struct amigos{
+	string nombre;
+	string sexo;
+	int numero;
+	int edad;
+	};
+
+
+void main()
+{
+	int op;
+	do{
+	cout<<"      MENU     "<<endl;
+	cout<<"1 Crear Archivo"<<endl;
+	cout<<"2 Adicionar amigo"<<endl;
+	cout<<"3 Mostrar amigos"<<endl;
+	cout<<"4 Modificar amigo"<<endl;
+	cout<<"0 Salir"<<endl;
+	cout<<"Ingrese una opcion ";
+	cin>>op;
+	switch(op)
+	{	case 1:
+		{
+			creararchivo();
+			break;
+		}
+		case 2:
+		{
+			adicionaramigo();
+			break;
+		}
+		case 3:
+		{
+			listado();
+			break;
+		}
+		case 4:
+		{
+			modificar();
+			break;
+		}
+		default:
+		{
+		}
+	}
+	}while(op!=0);
+	
+	getch();
+}
+
+void creararchivo()
+{
+	FILE *ptr;
+	amigos reg;
+	
+	ptr=fopen("agenda.dat","ab");
+	if(ptr!=NULL)
+		{
+			cin.ignore();
+			cout<<"Ingresar el nombre ";
+			getline(cin,reg.nombre);
+			cout<<"Ingrese el sexo ";
+			getline(cin,reg.sexo);
+			cout<<"Ingrese el numero ";
+			cin>>reg.numero;
+			cout<<"Ingrese la edad ";
+			cin>>reg.edad;
+
+			fwrite(&reg,sizeof(reg),1,ptr);
+		}
+	fclose(ptr);
+}
+void adicionaramigo()
+{
+	FILE *ptr;
+	amigos reg;
+
+	ptr=fopen("agenda.dat","ab");
+			cin.ignore();
+			cout<<"Ingresar el nombre ";
+			getline(cin,reg.nombre);
+			cout<<"Ingrese el sexo ";
+			getline(cin,reg.sexo);
+			cout<<"Ingrese el numero ";
+			cin>>reg.numero;
+			cout<<"Ingrese la edad ";
+			cin>>reg.edad;
+	fwrite(&reg,sizeof(reg),1,ptr);
+	fclose(ptr);
+
+}
+void listado()
+{
+	FILE *ptr;
+	amigos reg;
+	ptr=fopen("agenda.dat","rb");
+	if(ptr==NULL)
+		cout<<"El archivo no existe";
+	else
+	{
+		fread(&reg,sizeof(reg),1,ptr);
+		while(feof(ptr)==false)
+		{
+			cout<<reg.nombre;
+			cout<<reg.sexo;
+			cout<<reg.numero;
+			cout<<reg.edad;
+			fread(&reg,sizeof(reg),1,ptr);
+		}
+	}
+	fclose(ptr);
+}
+void modificar()
+{
+	FILE *ptr;
+	int pos;
+	string n;
+	amigos reg;
+	cout<<"Ingrese el nombre que desea modificar ";
+	getline(cin,n);
+	ptr=fopen("agenda.dat","r+b");
+	if(ptr==NULL)
+		cout<<"No existe el archivo";
+	else
+	{
+		pos=obtpos(n);
+		fseek(ptr,(pos-1)*sizeof(reg),SEEK_SET);
+		fread(&reg,sizeof(reg),1,ptr);
+		
+	}
+
+
+
+}
+
+int obtpos(string n)
+{
+	int cont=0;
+	FILE *ptr;
+	amigos reg;
+	ptr=fopen("agenda.dat","rb");
+	if(ptr==NULL)
+		cout<<"No existe el archivo";
+	else
+	{
+		cont++;
+		fread(&reg,sizeof(reg),1,ptr);
+		while(!feof(ptr)&&n!=reg.nombre)
+		{
+			fread(&reg,sizeof(reg),1,ptr);
+			cont++;
+		}
+	}
+	fclose(ptr);
+	return(cont);
+}
