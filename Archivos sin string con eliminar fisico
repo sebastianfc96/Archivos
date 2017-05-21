@@ -1,0 +1,269 @@
+#include "stdafx.h"
+#include <iostream>
+#include "conio.h"
+#define max 100
+
+using namespace std;
+
+void adicionar();
+void modificar();
+void mostrar();
+void eliminar();
+void eliminadofis();
+void consultar();
+int posicion(int cod);
+
+
+struct amigos{
+	int codigo;
+	int numero;
+	int edad;
+	char estado;
+	};
+
+
+
+void main()
+{
+	int op;
+	do{
+		cout<<"      MENU       "<<endl;
+		cout<<"1 Adicionar amigo"<<endl;
+		cout<<"2 Mostrar lista de amigos"<<endl;
+		cout<<"3 Consultar amigo"<<endl;
+		cout<<"4 Modificar amigo"<<endl;
+		cout<<"5 Eliminar amigo secuencial"<<endl;
+		cout<<"6 Eliminar amigo fisico"<<endl;
+		cout<<"Ingrese una opcion"<<endl;
+		cin>>op;
+		switch(op)
+		{
+			case 1:
+				{
+					adicionar();
+					break;
+				}
+			case 2:
+				{
+					mostrar();
+					break;
+				}
+			case 3:
+				{
+					consultar();
+					break;
+				}
+			case 4:
+				{
+					modificar();
+					break;
+				}
+			case 5:
+				{
+					eliminar();
+					break;
+				}
+			case 6:
+				{
+					eliminadofis();
+					break;
+				}
+			default :
+				{
+					cout<<"Salir";
+					break;
+				}
+
+		}
+
+}while(op!=0);
+	getch();
+}
+
+
+void adicionar()
+{
+	FILE *ptr;
+	amigos reg;
+	ptr=fopen("amigos.dat","ab");
+	if(ptr==NULL)
+		cout<<"El archivo no existe";
+	else
+	{
+		cout<<"Ingrese el codigo: ";
+		cin>>reg.codigo;
+		cout<<"Ingrese el numero: ";
+		cin>>reg.numero;
+		cout<<"Ingrese la edad: ";
+		cin>>reg.edad;
+		reg.estado='s';
+		fwrite(&reg,sizeof(reg),1,ptr);
+		fclose(ptr);
+	}
+}
+void mostrar()
+{
+	FILE *ptr;
+	amigos reg;
+	ptr=fopen("amigos.dat","rb");
+	if(ptr==NULL)
+		cout<<"El archivo no existe";
+	else
+	{
+		fread(&reg,sizeof(reg),1,ptr);
+		cout<<"CODIGO         NUMERO          EDAD "<<endl;
+		cout<<"------------------------------------"<<endl;
+		while(!feof(ptr))
+		{
+			if(reg.estado=='s')
+				cout<<reg.codigo<<"\t""\t"<<reg.numero<<"\t""\t"<<reg.edad<<endl;
+			fread(&reg,sizeof(reg),1,ptr);
+		}
+		cout<<"------------------------------------"<<endl;
+		fclose(ptr);
+	}
+}
+
+void modificar()
+{
+	FILE *ptr;
+	amigos reg;
+	int cod,pos;
+	ptr=fopen("amigos.dat","r+b");
+	if(ptr==NULL)
+		cout<<"El archivo no existe";
+	else
+	{
+		cout<<"Ingrese el codigo que desea modificar: ";
+		cin>>cod;
+		pos=posicion(cod);
+		fseek(ptr,(pos-1)*sizeof(reg),SEEK_SET);
+		fread(&reg,sizeof(reg),1,ptr);
+		reg.codigo=cod;
+		cout<<"Ingrese el numero: ";
+		cin>>reg.numero;
+		cout<<"Ingrese la edad: ";
+		cin>>reg.edad;
+		fseek(ptr,(pos-1)*sizeof(reg),SEEK_SET);
+		fwrite(&reg,sizeof(reg),1,ptr);
+		fclose(ptr);
+	}
+}
+
+int posicion(int cod)
+{
+	FILE *ptr;
+	amigos reg;
+	int cont=0,pos;
+	ptr=fopen("amigos.dat","rb");
+	if(ptr==NULL)
+		cout<<"El archivo no existe";
+	else
+	{
+		fread(&reg,sizeof(reg),1,ptr);
+		while(!feof(ptr))
+		{
+			cont++;
+			if(cod==reg.codigo)
+				pos=cont;
+			fread(&reg,sizeof(reg),1,ptr);
+		}
+		fclose(ptr);
+	}
+	return(pos);
+}
+
+void eliminar()
+{
+	FILE *ptr;
+	amigos reg;
+	int cod,pos;
+	ptr=fopen("amigos.dat","ab");
+	if(ptr==NULL)
+		cout<<"No existe el archivo";
+	else
+	{
+		cout<<"Que codigo desea eliminar: ";
+		cin>>cod;
+		pos=posicion(cod);
+		fseek(ptr,(pos-1)*sizeof(reg),SEEK_SET);
+		fread(&reg,sizeof(reg),1,ptr);
+		cout<<"CODIGO         NUMERO          EDAD "<<endl;
+		cout<<"------------------------------------"<<endl;
+		cout<<reg.codigo<<"\t""\t"<<reg.numero<<"\t""\t"<<reg.edad<<endl;
+		cout<<"------------------------------------"<<endl;
+		fseek(ptr,(pos-1)*sizeof(reg),SEEK_SET);
+		reg.estado='n';
+		fwrite(&reg,sizeof(reg),1,ptr);
+		fclose(ptr);
+		
+	}
+
+}
+
+void consultar()
+{
+	FILE *ptr;
+	amigos reg;
+	int pos,cod;
+	ptr=fopen("amigos.dat","rb");
+	if(ptr==NULL)
+		cout<<"El archivo no existe";
+	else
+	{
+		cout<<"Que codigo desea consultar: ";
+		cin>>cod;
+		pos=posicion(cod);
+		fseek(ptr,(pos-1)*sizeof(reg),SEEK_SET);
+		fread(&reg,sizeof(reg),1,ptr);
+		if(reg.estado=='n')
+			cout<<"El codigo fue eliminado";
+		else
+		{
+		fseek(ptr,(pos-1)*sizeof(reg),SEEK_SET);
+		cout<<"CODIGO         NUMERO          EDAD "<<endl;
+		cout<<"------------------------------------"<<endl;
+		cout<<reg.codigo<<"\t""\t"<<reg.numero<<"\t""\t"<<reg.edad<<endl;
+		cout<<"------------------------------------"<<endl;
+		fread(&reg,sizeof(reg),1,ptr);
+		fclose(ptr);
+		}
+		
+	}
+}
+
+void eliminadofis()
+{
+	FILE *ptr;
+	int cod,pos,tamv=0,i;
+	amigos reg,vec[max];
+	ptr=fopen("amigos.dat","rb");
+	if(ptr==NULL)
+		cout<<"El archivo no existe";
+	else
+	{
+		cout<<"Ingrese el codigo que desea eliminar: ";
+		cin>>cod;
+		fread(&reg,sizeof(reg),1,ptr);
+		while(!feof(ptr))
+		{
+			if(cod!=reg.codigo)
+			{
+			vec[tamv]=reg;
+			tamv++;
+			}
+		fread(&reg,sizeof(reg),1,ptr);
+		}
+		fclose(ptr);
+		ptr=fopen("amigos.dat","wb");
+		for(i=0;i<tamv;i++)
+		{
+			reg.codigo=vec[i].codigo;
+			reg.edad=vec[i].edad;
+			reg.estado=vec[i].estado;
+			reg.numero=vec[i].numero;
+			fwrite(&reg,sizeof(reg),1,ptr);
+		}
+		fclose(ptr);
+	}
+}
